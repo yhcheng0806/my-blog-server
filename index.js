@@ -3,9 +3,12 @@ import mongoose from "mongoose";
 import bodyParser from "body-parser";
 import cors from "cors";
 import dotenv from "dotenv";
+import path from "path";
 
 import userRoutes from "./routes/users.js";
+import uploadRoutes from "./routes/uploadRoutes.js";
 
+const __dirname = path.resolve();
 const app = express();
 dotenv.config();
 
@@ -13,7 +16,10 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-app.use("/user", userRoutes);
+app.use("/images", express.static(path.join(__dirname, "/images")));
+
+app.use("/api/user", userRoutes);
+app.use("/api/upload", uploadRoutes);
 
 app.get("/", (req, res) => res.send("server home"));
 
