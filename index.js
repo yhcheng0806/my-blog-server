@@ -5,7 +5,9 @@ import cors from "cors";
 import dotenv from "dotenv";
 import path from "path";
 
+import authRoutes from "./routes/auth.js";
 import userRoutes from "./routes/users.js";
+import postRoutes from "./routes/posts.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
 
 const __dirname = path.resolve();
@@ -18,14 +20,16 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use("/images", express.static(path.join(__dirname, "/images")));
 
-app.use("/api/user", userRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/posts",postRoutes)
 app.use("/api/upload", uploadRoutes);
 
 app.get("/", (req, res) => res.send("server home"));
 
 const PORT = process.env.PORT;
 
-mongoose
+mongoose 
   .connect(process.env.MONGO_URL, {
     useNewUrlParser: true,
     useUnifiedTopology: true,

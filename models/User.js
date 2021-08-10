@@ -2,11 +2,34 @@ import mongoose from "mongoose";
 
 const UserSchema = new mongoose.Schema(
   {
-    account: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
-    username: { type: String, default: "" },
-    email: { type: String, default: "" },
+    username: {
+      type: String,
+      required: true,
+      require: true,
+      min: 3,
+      max: 20,
+      unique: true,
+    },
+    email: {
+      type: String,
+      required: true,
+      max: 50,
+      unique: true,
+    },
+    password: { type: String, min: 6, required: true },
     avatar: { type: String, default: "" },
+    coverImg: { type: String, default: "" },
+    followList: { type: Array, default: [] },
+    fanList: { type: Array, default: [] },
+    describe: { type: String, default: "" },
+    area: {
+      type: Object,
+      default: null,
+    },
+    isAdmin: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );

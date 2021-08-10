@@ -40,7 +40,6 @@ export const register = async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    console.log(hashedPassword, "--hashedPassword--");
 
     const result = await User.create({
       ...req.body,
@@ -48,18 +47,14 @@ export const register = async (req, res) => {
       email,
       password: hashedPassword,
     });
-    console.log(result, "--result--");
     const token = jwt.sign(
       { username: result.username, id: result._id },
       "test",
       { expiresIn: "1h" }
     );
-    console.log(token, "--token--");
 
     res.status(200).json({ token, result });
   } catch (error) {
-    console.log(error, "--error--");
-
     res.status(500).json(error);
   }
 };
