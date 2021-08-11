@@ -8,9 +8,9 @@ export const login = async (req, res) => {
     const existingUser = await User.findOne({
       $or: [{ username: account }, { email: account }],
     });
-    if (!existingUser) return res.status(200).json({ message: "用户不存在！" });
+    if (!existingUser) return res.status(403).json({ message: "用户不存在！" });
     const validated = await bcrypt.compare(password, existingUser.password);
-    if (!validated) return res.status(200).json({ message: "登录无效" });
+    if (!validated) return res.status(403).json({ message: "密码错误" });
 
     const token = jwt.sign(
       { account: existingUser.account, id: existingUser._id },
@@ -28,14 +28,14 @@ export const register = async (req, res) => {
   const { username, email, password, confirmPass } = req.body;
 
   if (!username || !email || !password || !confirmPass) {
-    return res.status(200).json({ message: "请完善内容" });
+    return res.status(403).json({ message: "请完善内容" });
   }
   if (password !== confirmPass) {
-    return res.status(200).json({ message: "两次密码不一致" });
+    return res.status(403).json({ message: "两次密码不一致" });
   }
   try {
     const existingUser = await User.findOne({ username });
-    if (existingUser) return res.status(200).json({ message: "用户已存在！" });
+    if (existingUser) return res.status(403).json({ message: "用户已存在！" });
 
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);

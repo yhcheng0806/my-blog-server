@@ -1,65 +1,156 @@
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 
-export const login = async (req, res) => {
-  const { account, password } = req.body;
+export const followUser = async (req, res) => {
+  const { id } = req.params;
+  const { userId } = req.body;
+
+  if (id === userId) return res.status(403).json({ message: "你不能关注自己" });
+
   try {
-    const existingUser = await User.findOne({
-      $or: [{ username: account }, { email: account }],
-    });
-    if (!existingUser) return res.status(200).json({ message: "用户不存在！" });
-    const validated = await bcrypt.compare(password, existingUser.password);
-    if (!validated) return res.status(200).json({ message: "登录无效" });
+    const user = await User.findById(id);
+    const currentUser = await User.findById(userId);
+    if (user.fanList.includes(userId))
+      return res.status(403).json({ message: "你已经关注该用户" });
 
-    const token = jwt.sign(
-      { account: existingUser.account, id: existingUser._id },
-      "test",
-      { expiresIn: "1h" }
-    );
+    await user?.updateOne({ $push: { fanList: userId } });
+    await currentUser?.updateOne({ $push: { followList: id } });
 
-    res.status(200).json({ token, result: existingUser });
+    res.status(200).json({ message: "已关注" });
   } catch (error) {
     res.status(500).json(error);
   }
 };
 
-export const register = async (req, res) => {
-  const { username, email, password, confirmPass } = req.body;
+export const unfollowUser = async (req, res) => {
+  const { id } = req.params;
+  const { userId } = req.body;
 
-  if (!username || !email || !password || !confirmPass) {
-    return res.status(200).json({ message: "请完善内容" });
-  }
-  if (password !== confirmPass) {
-    return res.status(200).json({ message: "两次密码不一致" });
-  }
+  if (id === userId) return res.status(403).json({ message: "你不能取关自己" });
+
+  const user = await User.findById(id);
+  const currentUser = await User.findById(userId);
+
+  if (!user.fanList.includes(userId))
+    return res.status(403).json({ message: "你已经取消关注" });
+
+  await user?.updateOne({ $pull: { fanList: userId } });
+  await currentUser?.updateOne({ $pull: { followList: id } });
+
+  res.status(200).json({ message: "已取关" });
+};
+
+export const updateUser = async (req, res) => {
+  const { id } = req.params;
+  const { userId, isAdmin, password } = req.body;
+
+  if (id !== userId && !isAdmin)
+    return res.status(403).json({ message: "你不能更改他人的信息" });
+
   try {
-    const existingUser = await User.findOne({ username });
-    if (existingUser) return res.status(200).json({ message: "用户已存在！" });
+    const currentUser = await User.findById(userId);
+    const validated = await bcrypt.compare(password, currentUser.password);
 
+    if (!validated) return res.status(403).json({ message: "密码错误" });
+    
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    console.log(hashedPassword, "--hashedPassword--");
-
-    const result = await User.create({
-      ...req.body,
-      username,
-      email,
-      password: hashedPassword,
+    await currentUser?.updateOne({
+      $set: {
+        ...req.body,
+        password: hashedPassword
+      },
     });
-    console.log(result, "--result--");
-    const token = jwt.sign(
-      { username: result.username, id: result._id },
-      "test",
-      { expiresIn: "1h" }
-    );
-    console.log(token, "--token--");
 
-    res.status(200).json({ token, result });
+    res.status(200).json({ message: "修改成功" });
   } catch (error) {
-    console.log(error, "--error--");
+    console.log(error, "--error");
+    res.status(500).json(error);
+  }
+};
 
+export const deleteUser = async (req, res) => {
+  const { id } = req.params;
+  const { userId, isAdmin } = req.body;
+
+  if (id !== userId && !isAdmin)
+    return res.status(403).json({ message: "你不能删除他人的信息" });
+
+  try {
+    await User.findByIdAndDelete(userId);
+
+    res.status(200).json({ message: "删除成功" });
+  } catch (error) {
+    res.status(500).json(error);
+  }
+};
+
+export const getUser = async (req, res) => {
+  const { symbol } = req.params;
+
+  const options = [];
+  options.push(
+    symbol.length >= 20
+      ? {
+          _id: symbol,
+        }
+      : { username: symbol }
+  );
+
+  try {
+    const user = await User.findOne({
+      $or: options,
+    });
+    const { password, updatedAt, ...other } = user?._doc;
+    res.status(200).json(other);
+  } catch (error) {
+    res.status(500).json(error);
+  }
+};
+
+export const getUserfanList = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const user = await User?.findById(id);
+    const fanList = await Promise.all(
+      user?.fanList.map((fanId) => {
+        return User?.findById(fanId);
+      })
+    );
+
+    let result = [];
+
+    fanList.map((item) => {
+      const { _id, username, avatar } = item;
+      result.push({ _id, username, avatar });
+    });
+
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(500).json(error);
+  }
+};
+
+export const getUserFollowList = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const user = await User?.findById(id);
+    const followList = await Promise.all(
+      user?.followList.map((fanId) => {
+        return User?.findById(fanId);
+      })
+    );
+
+    let result = [];
+
+    followList.map((item) => {
+      const { _id, username, avatar } = item;
+      result.push({ _id, username, avatar });
+    });
+
+    res.status(200).json(result);
+  } catch (error) {
     res.status(500).json(error);
   }
 };
