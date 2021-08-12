@@ -44,25 +44,22 @@ export const unfollowUser = async (req, res) => {
 
 export const updateUser = async (req, res) => {
   const { id } = req.params;
-  const { userId, isAdmin, password } = req.body;
+  const { userId, isAdmin } = req.body;
 
   if (id !== userId && !isAdmin)
     return res.status(403).json({ message: "你不能更改他人的信息" });
 
   try {
     const currentUser = await User.findById(userId);
-    const validated = await bcrypt.compare(password, currentUser.password);
+    // const validated = await bcrypt.compare(password, currentUser.password);
 
-    if (!validated) return res.status(403).json({ message: "密码错误" });
+    // if (!validated) return res.status(403).json({ message: "密码错误" });
 
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
+    // const salt = await bcrypt.genSalt(10);
+    // const hashedPassword = await bcrypt.hash(password, salt);
 
     await currentUser?.updateOne({
-      $set: {
-        ...req.body,
-        password: hashedPassword,
-      },
+      $set: req.body
     });
 
     res.status(200).json({ message: "修改成功" });

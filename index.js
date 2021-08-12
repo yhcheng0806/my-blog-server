@@ -22,14 +22,14 @@ app.use("/images", express.static(path.join(__dirname, "/images")));
 
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
-app.use("/api/posts",postRoutes)
+app.use("/api/posts", postRoutes);
 app.use("/api/upload", uploadRoutes);
 
-app.get("/", (req, res) => res.send("server home"));
+app.get("/", (req, res) => res.send(`<div>server home</div>`));
 
 const PORT = process.env.PORT;
 
-mongoose 
+mongoose
   .connect(process.env.MONGO_URL, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
