@@ -17,14 +17,22 @@ const UserSchema = new mongoose.Schema(
       unique: true,
     },
     password: { type: String, min: 6, required: true },
+    name: {
+      type: String,
+      default: "",
+    },
     avatar: { type: String, default: "" },
     coverImg: { type: String, default: "" },
     followList: { type: Array, default: [] },
     fanList: { type: Array, default: [] },
     describe: { type: String, default: "" },
     area: {
-      type: Object,
-      default: null,
+      type: String,
+      default: "",
+    },
+    birthday: {
+      type: String,
+      default: "",
     },
     isAdmin: {
       type: Boolean,

@@ -88,3 +88,13 @@ export const getAllPost = async (req, res) => {
     res.status(500).json(error);
   }
 };
+
+export const getSelfPosts = async (req, res) => {
+  const { userId } = req.body;
+  try {
+    const posts = await Post.find({ userId });
+    res.status(200).json(posts);
+  } catch (error) {
+    res.status(500).json(error);
+  }
+};

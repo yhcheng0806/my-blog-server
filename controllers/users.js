@@ -16,7 +16,8 @@ export const followUser = async (req, res) => {
     await user?.updateOne({ $push: { fanList: userId } });
     await currentUser?.updateOne({ $push: { followList: id } });
 
-    res.status(200).json({ message: "已关注" });
+    // res.status(200).json({ message: "已关注" });
+    res.status(200).json({});
   } catch (error) {
     res.status(500).json(error);
   }
@@ -37,7 +38,8 @@ export const unfollowUser = async (req, res) => {
   await user?.updateOne({ $pull: { fanList: userId } });
   await currentUser?.updateOne({ $pull: { followList: id } });
 
-  res.status(200).json({ message: "已取关" });
+  // res.status(200).json({ message: "已取关" });
+  res.status(200).json({});
 };
 
 export const updateUser = async (req, res) => {
@@ -52,14 +54,14 @@ export const updateUser = async (req, res) => {
     const validated = await bcrypt.compare(password, currentUser.password);
 
     if (!validated) return res.status(403).json({ message: "密码错误" });
-    
+
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
     await currentUser?.updateOne({
       $set: {
         ...req.body,
-        password: hashedPassword
+        password: hashedPassword,
       },
     });
 
