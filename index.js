@@ -18,11 +18,17 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+app.all("*", (req, res, next) => {
+  console.log(req.path, "-----all-");
+  // response.writeHead(200, { "Content-Type": "text/html;charset=utf-8" });      //设置响应头属性值
+  next();
+});
+
 app.use("/images", express.static(path.join(__dirname, "/images")));
 
 //多资源托管
-app.use(express.static(path.join(__dirname, 'public', 'template')));
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, "public", "template")));
+app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
