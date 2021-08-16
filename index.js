@@ -20,6 +20,10 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use("/images", express.static(path.join(__dirname, "/images")));
 
+//多资源托管
+app.use(express.static(path.join(__dirname, 'public', 'template')));
+app.use(express.static(path.join(__dirname, 'public')));
+
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/posts", postRoutes);
