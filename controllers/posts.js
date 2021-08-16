@@ -2,8 +2,16 @@ import Post from "../models/Post.js";
 import User from "../models/User.js";
 
 export const createPost = async (req, res) => {
+  const { userId } = req.body;
+
   try {
-    const newPost = await Post.create(req.body);
+    const currentUser = await User.findById(userId);
+    const { name, username, avatar } = currentUser
+
+    const newPost = await Post.create({
+      ...req.body,
+      name, username, avatar
+    });
     res.status(200).json(newPost);
   } catch (error) {
     res.status(500).json(error);
@@ -59,11 +67,11 @@ export const likePost = async (req, res) => {
     const post = await Post.findById(req.params.id);
     const options = post.likes.includes(userId)
       ? {
-          $pull: { likes: userId },
-        }
+        $pull: { likes: userId },
+      }
       : {
-          $push: { likes: userId },
-        };
+        $push: { likes: userId },
+      };
     await post.updateOne(options);
     res.status(200).json({
       like: !post.likes.includes(userId),
