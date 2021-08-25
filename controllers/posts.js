@@ -6,31 +6,33 @@ export const createPost = async (req, res) => {
 
   try {
     const currentUser = await User.findById(userId);
-    const { name, username, avatar } = currentUser
+    const { name, username, avatar } = currentUser;
 
     const newPost = await Post.create({
       ...req.body,
-      name, username, avatar
+      name,
+      username,
+      avatar,
     });
     res.status(200).json(newPost);
   } catch (error) {
     res.status(500).json(error);
   }
 };
-export const followPost = async (req, res) => {
+export const followingPost = async (req, res) => {
   try {
     const { userId } = req.body;
 
     const currentUser = await User.findById(userId);
     const userPosts = await Post.find({ userId });
 
-    const followList = await Promise.all(
-      currentUser?.followList.map((followId) => {
+    const following = await Promise.all(
+      currentUser?.following.map((followId) => {
         return Post.find({ userId: followId });
       })
     );
 
-    res.status(200).json(userPosts.concat(...followList));
+    res.status(200).json(userPosts.concat(...following));
   } catch (error) {
     res.status(500).json(error);
   }
@@ -42,7 +44,7 @@ export const updatePost = async (req, res) => {
       await post.updateOne({ $set: req.body });
       res.status(200).json({});
     } else {
-      res.status(403).json({ message: "用户id识别错误" });
+      res.status(200).json({ message: "用户id识别错误" });
     }
   } catch (error) {
     res.status(500).json(error);
@@ -55,7 +57,7 @@ export const deletePost = async (req, res) => {
       await post.deleteOne();
       res.status(200).json({});
     } else {
-      res.status(403).json({ message: "用户id识别错误" });
+      res.status(200).json({ message: "用户id识别错误" });
     }
   } catch (error) {
     res.status(500).json(error);
@@ -67,11 +69,11 @@ export const likePost = async (req, res) => {
     const post = await Post.findById(req.params.id);
     const options = post.likes.includes(userId)
       ? {
-        $pull: { likes: userId },
-      }
+          $pull: { likes: userId },
+        }
       : {
-        $push: { likes: userId },
-      };
+          $push: { likes: userId },
+        };
     await post.updateOne(options);
     res.status(200).json({
       like: !post.likes.includes(userId),
@@ -88,7 +90,7 @@ export const getPost = async (req, res) => {
     res.status(500).json(error);
   }
 };
-export const getAllPost = async (req, res) => {
+export const getPosts = async (req, res) => {
   try {
     const posts = await Post.find({});
     res.status(200).json(posts);
@@ -98,9 +100,11 @@ export const getAllPost = async (req, res) => {
 };
 
 export const getSelfPosts = async (req, res) => {
-  const { userId } = req.body;
+  const { username, userId } = req.body;
   try {
-    const posts = await Post.find({ userId });
+    const posts = await Post.find({
+      $or: [{ username }, { userId }],
+    });
     res.status(200).json(posts);
   } catch (error) {
     res.status(500).json(error);

@@ -5,15 +5,15 @@ export const followUser = async (req, res) => {
   const { id } = req.params;
   const { userId } = req.body;
 
-  if (id === userId) return res.status(403).json({ message: "你不能关注自己" });
+  if (id === userId) return res.status(200).json({ message: "你不能关注自己" });
 
   try {
     const user = await User.findById(id);
     const currentUser = await User.findById(userId);
-    if (user.fanList.includes(userId))
-      return res.status(403).json({ message: "你已经关注该用户" });
+    if (user.followers.includes(userId))
+      return res.status(200).json({ message: "你已经关注该用户" });
 
-    await user?.updateOne({ $push: { fanList: userId } });
+    await user?.updateOne({ $push: { followers: userId } });
     await currentUser?.updateOne({ $push: { followList: id } });
 
     // res.status(200).json({ message: "已关注" });
@@ -27,15 +27,15 @@ export const unfollowUser = async (req, res) => {
   const { id } = req.params;
   const { userId } = req.body;
 
-  if (id === userId) return res.status(403).json({ message: "你不能取关自己" });
+  if (id === userId) return res.status(200).json({ message: "你不能取关自己" });
 
   const user = await User.findById(id);
   const currentUser = await User.findById(userId);
 
-  if (!user.fanList.includes(userId))
-    return res.status(403).json({ message: "你已经取消关注" });
+  if (!user.followers.includes(userId))
+    return res.status(200).json({ message: "你已经取消关注" });
 
-  await user?.updateOne({ $pull: { fanList: userId } });
+  await user?.updateOne({ $pull: { followers: userId } });
   await currentUser?.updateOne({ $pull: { followList: id } });
 
   // res.status(200).json({ message: "已取关" });
@@ -43,23 +43,24 @@ export const unfollowUser = async (req, res) => {
 };
 
 export const updateUser = async (req, res) => {
-  const { id } = req.params;
-  const { userId, isAdmin } = req.body;
+  const { username, account } = req.body;
 
-  if (id !== userId && !isAdmin)
-    return res.status(403).json({ message: "你不能更改他人的信息" });
+  // if (!isAdmin)
+  //   return res.status(200).json({ message: "你不能更改他人的信息" });
 
   try {
-    const currentUser = await User.findById(userId);
+    const currentUser = await User.findOne({
+      $or: [{ username }, { account }],
+    });
     // const validated = await bcrypt.compare(password, currentUser.password);
 
-    // if (!validated) return res.status(403).json({ message: "密码错误" });
+    // if (!validated) return res.status(200).json({ message: "密码错误" });
 
     // const salt = await bcrypt.genSalt(10);
     // const hashedPassword = await bcrypt.hash(password, salt);
 
     await currentUser?.updateOne({
-      $set: req.body
+      $set: req.body,
     });
 
     res.status(200).json({ message: "修改成功" });
@@ -74,7 +75,7 @@ export const deleteUser = async (req, res) => {
   const { userId, isAdmin } = req.body;
 
   if (id !== userId && !isAdmin)
-    return res.status(403).json({ message: "你不能删除他人的信息" });
+    return res.status(200).json({ message: "你不能删除他人的信息" });
 
   try {
     await User.findByIdAndDelete(userId);
@@ -108,19 +109,19 @@ export const getUser = async (req, res) => {
   }
 };
 
-export const getUserfanList = async (req, res) => {
+export const getUserfollowers = async (req, res) => {
   const { id } = req.params;
   try {
     const user = await User?.findById(id);
-    const fanList = await Promise.all(
-      user?.fanList.map((fanId) => {
+    const followers = await Promise.all(
+      user?.followers.map((fanId) => {
         return User?.findById(fanId);
       })
     );
 
     let result = [];
 
-    fanList.map((item) => {
+    followers.map((item) => {
       const { _id, username, avatar } = item;
       result.push({ _id, username, avatar });
     });

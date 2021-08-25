@@ -4,7 +4,7 @@ import multer from "multer";
 import { upload } from "../controllers/upload.js";
 
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, "images"),
+  destination: (req, file, cb) => cb(null, "static"),
   filename: (req, file, cb) => cb(null, req.body.name),
 });
 const _upload = multer({ storage });
