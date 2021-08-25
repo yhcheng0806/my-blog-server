@@ -75,9 +75,7 @@ export const likePost = async (req, res) => {
           $push: { likes: userId },
         };
     await post.updateOne(options);
-    res.status(200).json({
-      like: !post.likes.includes(userId),
-    });
+    res.status(200).json();
   } catch (error) {
     res.status(500).json(error);
   }
