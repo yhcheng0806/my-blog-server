@@ -8,6 +8,7 @@ import path from "path";
 import authRoutes from "./routes/auth.js";
 import userRoutes from "./routes/users.js";
 import postRoutes from "./routes/posts.js";
+import msgRoutes from './routes/msgs.js'
 import uploadRoutes from "./routes/uploadRoutes.js";
 
 const __dirname = path.resolve();
@@ -27,6 +28,7 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/posts", postRoutes);
+app.use("/api/msgs/",msgRoutes)
 app.use("/api/upload", uploadRoutes);
 
 app.get("/", (req, res) => res.send(`<div>server home</div>`));
