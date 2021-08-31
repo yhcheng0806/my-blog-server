@@ -8,6 +8,14 @@ const MsgSchema = mongoose.Schema(
     },
     from: { type: String, default: "", required: true },
     to: { type: String, default: "", required: true },
+    fromUser: {
+      type: Object,
+      default: null,
+    },
+    toUser: {
+      type: Object,
+      default: null,
+    },
     msg: {
       type: String,
       default: "",

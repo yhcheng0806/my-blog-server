@@ -6,15 +6,6 @@ const PostSchema = mongoose.Schema(
       type: String,
       required: true,
     },
-    name: {
-      type: String, default: ""
-    },
-    username: {
-      type: String, default: ""
-    },
-    avatar: {
-      type: String, default: ""
-    },
     desc: { type: String, required: true },
     photos: { type: Array, default: [] },
     collects: { type: Array, default: [] },

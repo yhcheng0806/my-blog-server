@@ -65,7 +65,6 @@ export const updateUser = async (req, res) => {
 
     res.status(200).json({ message: "修改成功" });
   } catch (error) {
-    console.log(error, "--error");
     res.status(500).json(error);
   }
 };

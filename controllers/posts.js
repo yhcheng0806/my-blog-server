@@ -1,3 +1,4 @@
+import Msg from "../models/Msg.js";
 import Post from "../models/Post.js";
 import User from "../models/User.js";
 
@@ -91,7 +92,20 @@ export const getPost = async (req, res) => {
 export const getPosts = async (req, res) => {
   try {
     const posts = await Post.find({});
-    res.status(200).json(posts);
+    const result = await Promise.all(
+      posts.map(async (post) => {
+        const { name, avatar, _id, username } = await User?.findById(
+          post.userId
+        );
+        const msgList = await Msg?.find({ postId: post._id });
+        return {
+          ...post._doc,
+          userInfo: { name, avatar, _id, username },
+          msgList,
+        };
+      })
+    );
+    res.status(200).json(result);
   } catch (error) {
     res.status(500).json(error);
   }
