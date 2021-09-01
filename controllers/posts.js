@@ -84,7 +84,15 @@ export const likePost = async (req, res) => {
 export const getPost = async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
-    res.status(200).json(post);
+    const { name, avatar, username, _id } = await User.findById(post.userId);
+    const msgList = await Msg?.find({ postId: post._id });
+
+    const result = {
+      ...post._doc,
+      userInfo: { name, avatar, _id, username },
+      msgList,
+    };
+    res.status(200).json(result);
   } catch (error) {
     res.status(500).json(error);
   }

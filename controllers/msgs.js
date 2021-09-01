@@ -66,3 +66,21 @@ export const sendMsg = async (req, res) => {
     res.status(500).json(error);
   }
 };
+
+export const likeMsg = async (req, res) => {
+  try {
+    const { userId } = req.body;
+    const msg = await Msg.findById(req.params.id);
+    const options = msg.likes.includes(userId)
+      ? {
+          $pull: { likes: userId },
+        }
+      : {
+          $push: { likes: userId },
+        };
+    await msg.updateOne(options);
+    res.status(200).json({ like: msg.likes.includes(userId) });
+  } catch (error) {
+    res.status(500).json(error);
+  }
+};
