@@ -10,11 +10,11 @@ export const followUser = async (req, res) => {
   try {
     const user = await User.findById(id);
     const currentUser = await User.findById(userId);
-    if (user.followers.includes(userId))
+    if (currentUser.following.includes(id))
       return res.status(200).json({ message: "你已经关注该用户" });
 
     await user?.updateOne({ $push: { followers: userId } });
-    await currentUser?.updateOne({ $push: { followList: id } });
+    await currentUser?.updateOne({ $push: { following: id } });
 
     // res.status(200).json({ message: "已关注" });
     res.status(200).json({});
@@ -32,11 +32,11 @@ export const unfollowUser = async (req, res) => {
   const user = await User.findById(id);
   const currentUser = await User.findById(userId);
 
-  if (!user.followers.includes(userId))
+  if (!currentUser.following.includes(userId))
     return res.status(200).json({ message: "你已经取消关注" });
 
   await user?.updateOne({ $pull: { followers: userId } });
-  await currentUser?.updateOne({ $pull: { followList: id } });
+  await currentUser?.updateOne({ $pull: { following: id } });
 
   // res.status(200).json({ message: "已取关" });
   res.status(200).json({});
